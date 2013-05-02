@@ -8,7 +8,7 @@ gargoyle.helpers
 
 from django.core.serializers.json import DjangoJSONEncoder
 from django.http import HttpRequest
-from django.utils import simplejson
+import json as simplejson
 
 import datetime
 import uuid
