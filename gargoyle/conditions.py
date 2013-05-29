@@ -15,6 +15,7 @@ from django.http import HttpRequest
 from django.utils.html import escape
 from django.utils.safestring import mark_safe
 from django.core.validators import ValidationError
+from django.contrib.auth.models import User, Group as UserGroup
 
 from gargoyle.models import EXCLUDE
 
@@ -138,6 +139,22 @@ class String(Field):
     pass
 
 
+class Group(Field):
+
+    def is_active(self, condition, value):
+        return User.objects.get(id=value).groups.filter(id=condition).exists()
+
+    def render(self, value):
+        return mark_safe('<select name="%s">%s</select>' % (escape(self.name), ''.join(["<option value='%s'>%s</option>" % (escape(usergroup.id), escape(usergroup.name)) for usergroup in UserGroup.objects.all().order_by('name')])))
+
+    def display(self, value):
+        try:
+            name = UserGroup.objects.get(id=value)
+        except UserGroup.DoesNotExist:
+            name = None
+        return '%s: %s' % (self.label, name)
+
+
 class AbstractDate(Field):
     DATE_FORMAT = "%Y-%m-%d"
     PRETTY_DATE_FORMAT = "%d %b %Y"
@@ -246,7 +263,7 @@ class ConditionSet(object):
         """
         # XXX: can we come up w/ a better API?
         # Ensure we map ``percent`` to the ``id`` column
-        if field_name == 'percent':
+        if field_name == 'percent' or 'is_member_of_group':
             field_name = 'id'
         value = getattr(instance, field_name)
         if callable(value):

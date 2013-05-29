@@ -8,7 +8,7 @@ gargoyle.builtins
 
 from gargoyle import gargoyle
 from gargoyle.conditions import ModelConditionSet, RequestConditionSet, Percent, String, Boolean, \
-    ConditionSet, OnOrAfterDate
+    ConditionSet, OnOrAfterDate, Group
 
 from django.conf import settings
 from django.contrib.auth.models import AnonymousUser, User
@@ -26,6 +26,7 @@ class UserConditionSet(ModelConditionSet):
     is_staff = Boolean(label='Staff')
     is_superuser = Boolean(label='Superuser')
     date_joined = OnOrAfterDate(label='Joined on or after')
+    is_member_of_group = Group(label='Is member of group')
 
     def can_execute(self, instance):
         return isinstance(instance, (User, AnonymousUser))
